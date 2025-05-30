@@ -21,8 +21,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    // Initialize AuthController with GetX
-    Get.put(AuthController(), permanent: true); // Reuse existing instance
+    Get.put(AuthController(), permanent: true);
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -53,10 +52,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    // Access AuthController
     final authController = Get.find<AuthController>();
 
-    // Listen for error messages using the RxString
     ever(authController.errorMessage, (String? error) {
       if (error != null && error.isNotEmpty) {
         _showError(error);
@@ -76,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/images/store.jpg',
+                    'assets/images/icon1.jpg',
                     width: 200,
                     height: 200,
                     fit: BoxFit.cover,
@@ -104,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     decoration: InputDecoration(
                       labelText: "Email",
                       labelStyle: TextStyle(color: Colors.grey[700]),
-                      prefixIcon: const Icon(Icons.email_outlined, color: Colors.orange),
+                      prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF93441A)),
                       filled: true,
                       fillColor: Colors.grey[100],
                       border: OutlineInputBorder(
@@ -113,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Colors.orange, width: 2),
+                        borderSide: const BorderSide(color: Color(0xFF93441A), width: 2),
                       ),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -126,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     decoration: InputDecoration(
                       labelText: "Password",
                       labelStyle: TextStyle(color: Colors.grey[700]),
-                      prefixIcon: const Icon(Icons.lock_outline, color: Colors.orange),
+                      prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF93441A)),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -146,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Colors.orange, width: 2),
+                        borderSide: const BorderSide(color: Color(0xFF93441A), width: 2),
                       ),
                     ),
                     obscureText: _obscurePassword,
@@ -157,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   Obx(
                     () => ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
+                        backgroundColor: const Color(0xFF93441A),
                         minimumSize: const Size(double.infinity, 55),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         elevation: 5,
@@ -203,36 +200,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   ),
                   const SizedBox(height: 20),
 
-                  // Social buttons (mock)
-                  SocialSigninButton(
-                    icon: Icons.g_mobiledata,
-                    text: "Sign in with Google",
-                    color: Colors.white,
-                    textColor: Colors.black87,
-                    borderColor: Colors.grey[300],
-                    onPressed: () {
-                      _showError("Sign in with Google is not implemented yet.");
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  SocialSigninButton(
-                    icon: Icons.facebook,
-                    text: "Sign in with Facebook",
-                    color: const Color(0xFF1877F2),
-                    textColor: Colors.white,
-                    onPressed: () {
-                      _showError("Sign in with Facebook is not implemented yet.");
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  SocialSigninButton(
-                    icon: Icons.apple,
-                    text: "Sign in with Apple",
-                    color: Colors.black,
-                    textColor: Colors.white,
-                    onPressed: () {
-                      _showError("Sign in with Apple is not implemented yet.");
-                    },
+                  // Google Sign-In Button
+                  Obx(
+                    () => SocialSigninButton(
+                      icon: Icons.g_mobiledata,
+                      text: "Sign in with Google",
+                      color: Colors.white,
+                      textColor: Colors.black87,
+                      borderColor: Colors.grey[300],
+                      onPressed: authController.isLoading
+                          ? () {}
+                          : () {
+                              authController.signInWithGoogle();
+                            },
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -251,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         child: const Text(
                           "Sign Up",
                           style: TextStyle(
-                            color: Colors.orange,
+                            color: Color(0xFF93441A),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -268,12 +249,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                       GestureDetector(
                         onTap: () {
-                          Get.toNamed('/signup-seller');
+                          Get.toNamed('/signup_seller');
                         },
                         child: const Text(
                           "Sign Up",
                           style: TextStyle(
-                            color: Colors.orange,
+                            color: Color(0xFF93441A),
                             fontWeight: FontWeight.bold,
                           ),
                         ),

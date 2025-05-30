@@ -1,8 +1,9 @@
+import 'package:carthage_store/controllers/auth-controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/auth-controller.dart';
+
 
 class SignupSellerScreen extends StatefulWidget {
   const SignupSellerScreen({super.key});
@@ -12,8 +13,10 @@ class SignupSellerScreen extends StatefulWidget {
 }
 
 class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTickerProviderStateMixin {
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   bool _agreeToTerms = false;
@@ -37,8 +40,10 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
   @override
   void dispose() {
     _animationController.dispose();
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -78,18 +83,18 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                 children: [
                   Image.asset(
                     'assets/images/grocery-store.jpg',
-                    width: 200,
-                    height: 200,
+                    width: 100,
+                    height: 100,
                     fit: BoxFit.cover,
                   ),
                   const SizedBox(height: 15),
                   const Text(
                     "Create Seller Account",
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 30,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
-                      letterSpacing: 1.2,
+                      letterSpacing: 0.2,
                     ),
                   ),
                   const SizedBox(height: 7),
@@ -102,13 +107,13 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                   ),
                   const SizedBox(height: 20),
 
-                  // Email Field
+                  // Full Name Field
                   TextField(
-                    controller: _emailController,
+                    controller: _fullNameController,
                     decoration: InputDecoration(
-                      labelText: "Email",
+                      labelText: "Full Name",
                       labelStyle: TextStyle(color: Colors.grey[700]),
-                      prefixIcon: const Icon(Icons.email_outlined, color: Colors.orange),
+                      prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF93441A)),
                       filled: true,
                       fillColor: Colors.grey[100],
                       border: OutlineInputBorder(
@@ -117,7 +122,29 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Colors.orange, width: 2),
+                        borderSide: const BorderSide(color: Color(0xFF93441A), width: 2),
+                      ),
+                    ),
+                    keyboardType: TextInputType.name,
+                  ),
+                  const SizedBox(height: 15),
+
+                  // Email Field
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      labelStyle: TextStyle(color: Colors.grey[700]),
+                      prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF93441A)),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF93441A), width: 2),
                       ),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -130,7 +157,7 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                     decoration: InputDecoration(
                       labelText: "Password",
                       labelStyle: TextStyle(color: Colors.grey[700]),
-                      prefixIcon: const Icon(Icons.lock_outline, color: Colors.orange),
+                      prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF93441A)),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -150,10 +177,32 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Colors.orange, width: 2),
+                        borderSide: const BorderSide(color: Color(0xFF93441A), width: 2),
                       ),
                     ),
                     obscureText: _obscurePassword,
+                  ),
+                  const SizedBox(height: 15),
+
+                  // Confirm Password Field
+                  TextField(
+                    controller: _confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: "Confirm Password",
+                      labelStyle: TextStyle(color: Colors.grey[700]),
+                      prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF93441A)),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF93441A), width: 2),
+                      ),
+                    ),
+                    obscureText: true,
                   ),
                   const SizedBox(height: 15),
 
@@ -167,7 +216,7 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                             _agreeToTerms = value ?? false;
                           });
                         },
-                        activeColor: Colors.orange,
+                        activeColor: Color(0xFF93441A),
                       ),
                       Expanded(
                         child: Text(
@@ -183,7 +232,7 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                   Obx(
                     () => ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
+                        backgroundColor: Color(0xFF93441A),
                         minimumSize: const Size(double.infinity, 55),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         elevation: 5,
@@ -191,9 +240,35 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                       onPressed: authController.isLoading
                           ? null
                           : () {
+                              final fullName = _fullNameController.text.trim();
+                              final email = _emailController.text.trim();
+                              final password = _passwordController.text.trim();
+                              final confirmPassword = _confirmPasswordController.text.trim();
+
+                              if (fullName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+                                _showError("Please fill in all fields.");
+                                return;
+                              }
+
+                              if (password.length < 6) {
+                                _showError("Password must be at least 6 characters.");
+                                return;
+                              }
+
+                              if (password != confirmPassword) {
+                                _showError("Passwords do not match.");
+                                return;
+                              }
+
+                              if (!_agreeToTerms) {
+                                _showError("You must agree to the terms and conditions.");
+                                return;
+                              }
+
                               authController.registerUser(
-                                email: _emailController.text.trim(),
-                                password: _passwordController.text.trim(),
+                                email: email,
+                                password: password,
+                                fullName: fullName,
                                 role: 'seller',
                                 agreeToTerms: _agreeToTerms,
                               );
@@ -239,26 +314,6 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                       _showError("Sign up with Google is not implemented yet.");
                     },
                   ),
-                  const SizedBox(height: 15),
-                  SocialSigninButton(
-                    icon: Icons.facebook,
-                    text: "Sign up with Facebook",
-                    color: const Color(0xFF1877F2),
-                    textColor: Colors.white,
-                    onPressed: () {
-                      _showError("Sign up with Facebook is not implemented yet.");
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  SocialSigninButton(
-                    icon: Icons.apple,
-                    text: "Sign up with Apple",
-                    color: Colors.black,
-                    textColor: Colors.white,
-                    onPressed: () {
-                      _showError("Sign up with Apple is not implemented yet.");
-                    },
-                  ),
                   const SizedBox(height: 20),
 
                   // Link to login
@@ -276,13 +331,14 @@ class _SignupSellerScreenState extends State<SignupSellerScreen> with SingleTick
                         child: const Text(
                           "Sign In",
                           style: TextStyle(
-                            color: Colors.orange,
+                            color: Color(0xFF93441A),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
+        
                 ],
               ),
             ),
@@ -336,4 +392,4 @@ class SocialSigninButton extends StatelessWidget {
       ),
     );
   }
-} 
+}

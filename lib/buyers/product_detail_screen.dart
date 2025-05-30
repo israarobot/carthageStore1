@@ -96,7 +96,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> with Single
                             SizedBox(height: 10),
                             Row(
                               children: [
-                                Icon(Icons.star, color: Colors.orange, size: 20),
+                                Icon(Icons.star, color: Color(0xFF93441A), size: 20),
                                 SizedBox(width: 5),
                                 Text(
                                   "${widget.product["rating"]}",
@@ -115,7 +115,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> with Single
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.orange,
+                                color: Color(0xFF93441A),
                               ),
                             ),
                             SizedBox(height: 20),
@@ -212,7 +212,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> with Single
     return ElevatedButton(
       onPressed: () {},
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orange,
+        backgroundColor: Color(0xFF93441A),
         padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25),

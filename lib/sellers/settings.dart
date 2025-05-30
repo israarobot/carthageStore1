@@ -23,7 +23,7 @@ class SettingsScreen extends StatelessWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange.shade400, Colors.purple.shade400],
+              colors: [Color(0xFF93441A), Colors.purple.shade400],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
                 'Feature Coming Soon',
                 'Edit Profile functionality will be available in the next update.',
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.orange.shade600,
+                backgroundColor: Color(0xFF93441A),
                 colorText: Colors.white,
                 margin: EdgeInsets.all(16),
                 borderRadius: 12,
@@ -60,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
                 'Feature Coming Soon',
                 'Store Settings functionality will be available in the next update.',
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.orange.shade600,
+                backgroundColor: Color(0xFF93441A),
                 colorText: Colors.white,
                 margin: EdgeInsets.all(16),
                 borderRadius: 12,
@@ -77,7 +77,7 @@ class SettingsScreen extends StatelessWidget {
                 'Feature Coming Soon',
                 'Notification settings will be available in the next update.',
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.orange.shade600,
+                backgroundColor: Color(0xFF93441A),
                 colorText: Colors.white,
                 margin: EdgeInsets.all(16),
                 borderRadius: 12,
@@ -93,7 +93,7 @@ class SettingsScreen extends StatelessWidget {
                 'Feature Coming Soon',
                 'Language settings will be available in the next update.',
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.orange.shade600,
+                backgroundColor: Color(0xFF93441A),
                 colorText: Colors.white,
                 margin: EdgeInsets.all(16),
                 borderRadius: 12,
@@ -110,7 +110,7 @@ class SettingsScreen extends StatelessWidget {
                 'Feature Coming Soon',
                 'Help & Support will be available in the next update.',
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.orange.shade600,
+                backgroundColor: Color(0xFF93441A),
                 colorText: Colors.white,
                 margin: EdgeInsets.all(16),
                 borderRadius: 12,
@@ -126,7 +126,7 @@ class SettingsScreen extends StatelessWidget {
                 'App Info',
                 'Seller Dashboard v1.0.0',
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.orange.shade600,
+                backgroundColor: Color(0xFF93441A),
                 colorText: Colors.white,
                 margin: EdgeInsets.all(16),
                 borderRadius: 12,
@@ -168,7 +168,7 @@ class SettingsScreen extends StatelessWidget {
       child: ListTile(
         leading: Icon(
           icon,
-          color: Colors.orange.shade600,
+          color: Color(0xFF93441A),
           size: 28,
         ),
         title: Text(

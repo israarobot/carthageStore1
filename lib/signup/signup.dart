@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:carthage_store/controllers/auth-controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/auth-controller.dart'; // Note: File name should match the case of the actual file
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -12,33 +10,49 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderStateMixin {
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+
+  final authController = Get.put(AuthController(), permanent: true);
+
   bool _agreeToTerms = false;
   bool _obscurePassword = true;
 
   @override
   void initState() {
     super.initState();
-    // Initialize AuthController with GetX
-    Get.put(AuthController());
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
+
     _animationController.forward();
+
+    ever(authController.errorMessage, (String? error) {
+      if (error != null && error.isNotEmpty) {
+        _showError(error);
+        authController.clearError();
+      }
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -54,17 +68,6 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    // Access AuthController
-    final authController = Get.find<AuthController>();
-
-    // Listen for error messages using the public getter
-    ever(authController.errorMessage, (String? error) {
-      if (error != null && error.isNotEmpty) {
-        _showError(error);
-        authController.clearError();
-      }
-    });
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -77,9 +80,9 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/images/retailer.jpg',
-                    width: 200,
-                    height: 200,
+                    'assets/images/icon2.jpg',
+                    width: 100,
+                    height: 100,
                     fit: BoxFit.cover,
                   ),
                   const SizedBox(height: 15),
@@ -95,42 +98,34 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                   const SizedBox(height: 7),
                   Text(
                     "Join Carthage Store today!",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 20),
 
-                  // Email Field
+                  // Full Name
                   TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      labelStyle: TextStyle(color: Colors.grey[700]),
-                      prefixIcon: const Icon(Icons.email_outlined, color: Colors.orange),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Colors.orange, width: 2),
-                      ),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
+                    controller: _fullNameController,
+                    decoration: _buildInputDecoration("Full Name", Icons.person_outline),
+                    keyboardType: TextInputType.name,
+                    textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 15),
 
-                  // Password Field
+                  // Email
+                  TextField(
+                    controller: _emailController,
+                    decoration: _buildInputDecoration("Email", Icons.email_outlined),
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 15),
+
+                  // Password
                   TextField(
                     controller: _passwordController,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      labelStyle: TextStyle(color: Colors.grey[700]),
-                      prefixIcon: const Icon(Icons.lock_outline, color: Colors.orange),
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.next,
+                    decoration: _buildInputDecoration("Password", Icons.lock_outline).copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -142,22 +137,19 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                           });
                         },
                       ),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Colors.orange, width: 2),
-                      ),
                     ),
-                    obscureText: _obscurePassword,
                   ),
                   const SizedBox(height: 15),
 
-                  // Terms Checkbox
+                  // Confirm Password
+                  TextField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: _buildInputDecoration("Confirm Password", Icons.lock_outline),
+                  ),
+                  const SizedBox(height: 15),
+
+                  // Terms
                   Row(
                     children: [
                       Checkbox(
@@ -167,7 +159,7 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                             _agreeToTerms = value ?? false;
                           });
                         },
-                        activeColor: Colors.orange,
+                        activeColor: const Color(0xFF93441A),
                       ),
                       Expanded(
                         child: Text(
@@ -180,109 +172,61 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                   const SizedBox(height: 15),
 
                   // Register Button
-                  Obx(
-                    () => ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        minimumSize: const Size(double.infinity, 55),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        elevation: 5,
-                      ),
-                      onPressed: authController.isLoading
-                          ? null
-                          : () {
-                              authController.registerUser(
-                                email: _emailController.text.trim(),
-                                password: _passwordController.text.trim(),
-                                role: 'buyer',
-                                agreeToTerms: _agreeToTerms,
-                              );
-                            },
-                      child: authController.isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                              "Create Account",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Divider OR
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.grey[400])),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          "OR",
-                          style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Expanded(child: Divider(color: Colors.grey[400])),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Social buttons (mock)
-                  SocialSigninButton(
-                    icon: Icons.g_mobiledata,
-                    text: "Sign up with Google",
-                    color: Colors.white,
-                    textColor: Colors.black87,
-                    borderColor: Colors.grey[300],
-                    onPressed: () {
-                      _showError("Sign up with Google is not implemented yet.");
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  SocialSigninButton(
-                    icon: Icons.facebook,
-                    text: "Sign up with Facebook",
-                    color: const Color(0xFF1877F2),
-                    textColor: Colors.white,
-                    onPressed: () {
-                      _showError("Sign up with Facebook is not implemented yet.");
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  SocialSigninButton(
-                    icon: Icons.apple,
-                    text: "Sign up with Apple",
-                    color: Colors.black,
-                    textColor: Colors.white,
-                    onPressed: () {
-                      _showError("Sign up with Apple is not implemented yet.");
-                    },
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Link to login
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Already have an account? ",
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Get.toNamed('/login');
-                        },
-                        child: const Text(
-                          "Sign In",
-                          style: TextStyle(
-                            color: Colors.orange,
-                            fontWeight: FontWeight.bold,
+                  Obx(() => ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF93441A),
+                          minimumSize: const Size(double.infinity, 55),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
+                          elevation: 5,
                         ),
-                      ),
-                    ],
-                  ),
+                        onPressed: authController.isLoading
+                            ? null
+                            : () {
+                                final fullName = _fullNameController.text.trim();
+                                final email = _emailController.text.trim();
+                                final password = _passwordController.text.trim();
+                                final confirmPassword = _confirmPasswordController.text.trim();
+
+                                if (fullName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+                                  _showError("Please fill in all fields.");
+                                  return;
+                                }
+
+                                if (password.length < 6) {
+                                  _showError("Password must be at least 6 characters.");
+                                  return;
+                                }
+
+                                if (password != confirmPassword) {
+                                  _showError("Passwords do not match.");
+                                  return;
+                                }
+
+                                if (!_agreeToTerms) {
+                                  _showError("You must agree to the terms and conditions.");
+                                  return;
+                                }
+
+                                authController.registerUser(
+                                  email: email,
+                                  password: password,
+                                  fullName: fullName,
+                                  role: 'buyer',
+                                  agreeToTerms: _agreeToTerms,
+                                );
+                              },
+                        child: authController.isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text(
+                                "Create Account",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                      )),
+                  const SizedBox(height: 20),
+
+                  
                 ],
               ),
             ),
@@ -291,9 +235,26 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
       ),
     );
   }
+
+  InputDecoration _buildInputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.grey[700]),
+      prefixIcon: Icon(icon, color: const Color(0xFF93441A)),
+      filled: true,
+      fillColor: Colors.grey[100],
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: Color(0xFF93441A), width: 2),
+      ),
+    );
+  }
 }
 
-// Custom Social Signin Button
 class SocialSigninButton extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -328,11 +289,7 @@ class SocialSigninButton extends StatelessWidget {
       icon: Icon(icon, color: textColor, size: 24),
       label: Text(
         text,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w500),
       ),
     );
   }

@@ -123,7 +123,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       value: _selectedPaymentMethod,
       decoration: InputDecoration(
         labelText: "Payment Method",
-        prefixIcon: Icon(Icons.payment, color: Colors.orange),
+        prefixIcon: Icon(Icons.payment, color: Color(0xFF93441A)),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
       items: ['Credit Card', 'PayPal', 'Cash on Delivery']
@@ -147,7 +147,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       maxLength: maxLength,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: Colors.orange),
+        prefixIcon: Icon(icon, color: Color(0xFF93441A)),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         filled: true,
         fillColor: Colors.grey.shade100,
@@ -195,7 +195,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Total", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              Text("\$210.00", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange)),
+              Text("\$210.00", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF93441A))),
             ],
           ),
         ],
@@ -209,7 +209,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       child: ElevatedButton(
         onPressed: _processPayment,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
+          backgroundColor: Color(0xFF93441A),
           padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),

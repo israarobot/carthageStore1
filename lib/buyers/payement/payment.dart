@@ -24,7 +24,7 @@ class PaymentSuccessScreen extends StatelessWidget {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.orange,
+              color: Color(0xFF93441A),
             ),
             child: Icon(
               Icons.check,
@@ -87,7 +87,7 @@ class PaymentSuccessScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(Colors.orange),
+                  backgroundColor: WidgetStateProperty.all<Color>(Color(0xFF93441A)),
                   foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
                   padding: WidgetStateProperty.all<EdgeInsets>(
                     EdgeInsets.symmetric(vertical: 12),

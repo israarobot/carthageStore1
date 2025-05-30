@@ -39,10 +39,17 @@ dependencies:
   firebase_auth: ^5.5.3
   cloud_firestore: ^5.6.7
   google_sign_in: ^6.3.0
+  google_fonts: ^6.2.1
   firebase_storage: ^12.1.0
   image_picker: ^1.0.0
+  video_player: ^2.9.5
+  carousel_slider: ^5.0.0 
+  chewie: ^1.11.3
+  animate_do: ^4.2.0
   dropdown_button2: ^2.3.9
   provider: ^6.1.5
+  cached_network_image: ^3.4.1
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

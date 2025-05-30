@@ -42,7 +42,7 @@ class EarningsScreen extends StatelessWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange.shade400, Colors.purple.shade400],
+              colors: [Color(0xFF93441A), Colors.purple.shade400],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -133,7 +133,7 @@ class EarningsScreen extends StatelessWidget {
               child: ListTile(
                 leading: Icon(
                   Icons.calendar_today,
-                  color: Colors.orange.shade600,
+                  color: Color(0xFF93441A),
                   size: 28,
                 ),
                 title: Text(
@@ -170,7 +170,7 @@ class EarningsScreen extends StatelessWidget {
               child: ListTile(
                 leading: Icon(
                   Icons.receipt,
-                  color: Colors.orange.shade600,
+                  color: Color(0xFF93441A),
                   size: 28,
                 ),
                 title: Text(

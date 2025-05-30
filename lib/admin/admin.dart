@@ -2,6 +2,7 @@ import 'package:carthage_store/admin/admin-settings.dart';
 import 'package:carthage_store/admin/bayers.dart';
 import 'package:carthage_store/admin/sellers.dart';
 import 'package:flutter/material.dart';
+import 'package:carthage_store/admin/all_products.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   @override
@@ -35,7 +36,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange, Colors.deepOrange],
+              colors: [Color(0xFF93441A), Colors.deepOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -114,7 +115,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           "Active",
           "${userStats['activeUsers']}",
           Icons.trending_up,
-          Colors.orange,
+          Color(0xFF93441A),
         ),
       ],
     );
@@ -203,6 +204,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Icons.person_add,
           Colors.purple,
           () => _showAddUserDialog(context),
+        ),
+         _buildActionButton(
+          context,
+          "All User",
+          Icons.analytics,
+          Colors.orange,
+          () => Navigator.pushNamed(context, '/all_users'),
+        ),
+        _buildActionButton(
+          context,
+          "All Products",
+         Icons.shopping_bag,
+          Color(0xFF93441A),
+          () => Navigator.push(
+            context,
+             MaterialPageRoute(builder: (context) =>CategoryScreen()),
+        ),
         ),
       ],
     );
@@ -312,7 +330,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: Color(0xFF93441A),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -363,7 +381,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange, Colors.deepOrange],
+              colors: [Color(0xFF93441A), Colors.deepOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -387,10 +405,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: Colors.orange.shade100,
+              backgroundColor: Color(0xFF93441A),
               child: Text(
                 user["name"]![0],
-                style: const TextStyle(fontSize: 24, color: Colors.orange),
+                style: const TextStyle(fontSize: 24, color: Color(0xFF93441A)),
               ),
             ),
             const SizedBox(width: 16),
@@ -465,7 +483,7 @@ class UserReportsScreen extends StatelessWidget {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange, Colors.deepOrange],
+              colors: [Color(0xFF93441A), Colors.deepOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

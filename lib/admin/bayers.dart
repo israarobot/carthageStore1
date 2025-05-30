@@ -139,7 +139,7 @@ class _BuyersScreenState extends State<BuyersScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange, Colors.deepOrange],
+              colors: [Color(0xFF93441A), Colors.deepOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -220,7 +220,7 @@ class _BuyersScreenState extends State<BuyersScreen> {
                 _buildInfoChip("Status", buyer["status"],
                     buyer["status"] == "Active" ? Colors.green : Colors.red),
                 _buildInfoChip("Phone", buyer["phone"], Colors.purple),
-                _buildInfoChip("Joined", buyer["joinDate"], Colors.orange),
+                _buildInfoChip("Joined", buyer["joinDate"], Color(0xFF93441A)),
                 _buildInfoChip("Spent", "\$${buyer["totalSpent"]}", Colors.teal),
               ],
             ),

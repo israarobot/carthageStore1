@@ -1,71 +1,12 @@
+import 'package:carthage_store/controllers/auth-controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Added this import
 import 'package:flutter/material.dart';
+import 'package:carthage_store/controllers/checkout_controller.dart';
 import 'package:get/get.dart';
 
 class OrdersScreen extends StatelessWidget {
-  // Mock list of 10 orders managed with Rx for reactivity
-  final RxList<Order> orders =
-      <Order>[
-        Order(
-          id: 'ORD001',
-          customerName: 'John Doe',
-          item: 'Laptop Pro',
-          status: 'pending',
-        ),
-        Order(
-          id: 'ORD002',
-          customerName: 'Jane Smith',
-          item: 'Wireless Mouse',
-          status: 'pending',
-        ),
-        Order(
-          id: 'ORD003',
-          customerName: 'Alice Johnson',
-          item: 'USB-C Hub',
-          status: 'in progress',
-        ),
-        Order(
-          id: 'ORD004',
-          customerName: 'Bob Wilson',
-          item: 'Ergonomic Keyboard',
-          status: 'pending',
-        ),
-        Order(
-          id: 'ORD005',
-          customerName: 'Emma Brown',
-          item: 'Monitor Stand',
-          status: 'done',
-        ),
-        Order(
-          id: 'ORD006',
-          customerName: 'Michael Chen',
-          item: 'Webcam HD',
-          status: 'in progress',
-        ),
-        Order(
-          id: 'ORD007',
-          customerName: 'Sarah Davis',
-          item: 'Noise-Canceling Headphones',
-          status: 'rejected',
-        ),
-        Order(
-          id: 'ORD008',
-          customerName: 'David Lee',
-          item: 'Portable SSD',
-          status: 'pending',
-        ),
-        Order(
-          id: 'ORD009',
-          customerName: 'Laura Martinez',
-          item: 'Smartphone Charger',
-          status: 'in progress',
-        ),
-        Order(
-          id: 'ORD010',
-          customerName: 'Chris Taylor',
-          item: 'Gaming Mouse Pad',
-          status: 'done',
-        ),
-      ].obs;
+  final CheckoutController checkoutController = Get.put(CheckoutController());
+  final AuthController authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +14,10 @@ class OrdersScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_outlined),
-          onPressed: (){ 
-           Get.offNamed('/dashboard-seller');
+          onPressed: () {
+            Get.offNamed('/dashboard-seller');
           },
         ),
-
         title: const Text(
           "Orders",
           style: TextStyle(
@@ -89,7 +29,7 @@ class OrdersScreen extends StatelessWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange.shade400, Colors.purple.shade400],
+              colors: [Color(0xFF93441A), Colors.purple.shade400],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -97,28 +37,48 @@ class OrdersScreen extends StatelessWidget {
         ),
         elevation: 0,
       ),
-      body: Obx(
-        () =>
-            orders.isEmpty
-                ? Center(
-                  child: Text(
-                    "No orders available.",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade600,
-                      fontFamily: 'Poppins',
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-                : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: orders.length,
-                  itemBuilder: (context, index) {
-                    final order = orders[index];
-                    return _buildOrderCard(order, index);
-                  },
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: checkoutController.fetchAllOrders(sellerId: authController.user?.uid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                "Error: ${snapshot.error}",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey.shade600,
+                  fontFamily: 'Poppins',
                 ),
+                textAlign: TextAlign.center,
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                "No orders available.",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey.shade600,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          final orders = snapshot.data!.map((data) => Order.fromMap(data)).toList();
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: orders.length,
+            itemBuilder: (context, index) {
+              final order = orders[index];
+              return _buildOrderCard(order, index);
+            },
+          );
+        },
       ),
     );
   }
@@ -166,6 +126,15 @@ class OrdersScreen extends StatelessWidget {
                 fontFamily: 'Poppins',
               ),
             ),
+            const SizedBox(height: 4),
+            Text(
+              "Price: \$${order.price.toStringAsFixed(2)}",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade800,
+                fontFamily: 'Poppins',
+              ),
+            ),
             const SizedBox(height: 16),
             _buildActionButtons(order, index),
           ],
@@ -179,7 +148,7 @@ class OrdersScreen extends StatelessWidget {
     String label;
     switch (status) {
       case 'pending':
-        color = Colors.orange.shade100;
+        color = Color(0xFF93441A);
         label = 'Pending';
         break;
       case 'in progress':
@@ -226,18 +195,30 @@ class OrdersScreen extends StatelessWidget {
             label: 'Accept',
             icon: Icons.check,
             color: Colors.green.shade600,
-            onPressed: () {
-              orders[index] = order.copyWith(status: 'in progress');
-              orders.refresh();
-              Get.snackbar(
-                'Order Accepted',
-                'Order #${order.id} is now in progress.',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green.shade600,
-                colorText: Colors.white,
-                margin: const EdgeInsets.all(16),
-                borderRadius: 12,
-              );
+            onPressed: () async {
+              try {
+                await checkoutController.updateOrderStatus(order.id, 'in progress');
+                Get.snackbar(
+                  'Order Accepted',
+                  'Order #${order.id} is now in progress.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.green.shade600,
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                  borderRadius: 12,
+                );
+                Get.forceAppUpdate();
+              } catch (e) {
+                Get.snackbar(
+                  'Error',
+                  'Failed to accept order: $e',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red.shade600,
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                  borderRadius: 12,
+                );
+              }
             },
           ),
           const SizedBox(width: 12),
@@ -245,18 +226,30 @@ class OrdersScreen extends StatelessWidget {
             label: 'Reject',
             icon: Icons.close,
             color: Colors.red.shade600,
-            onPressed: () {
-              orders[index] = order.copyWith(status: 'rejected');
-              orders.refresh();
-              Get.snackbar(
-                'Order Rejected',
-                'Order #${order.id} has been rejected.',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red.shade600,
-                colorText: Colors.white,
-                margin: const EdgeInsets.all(16),
-                borderRadius: 12,
-              );
+            onPressed: () async {
+              try {
+                await checkoutController.updateOrderStatus(order.id, 'rejected');
+                Get.snackbar(
+                  'Order Rejected',
+                  'Order #${order.id} has been rejected.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red.shade600,
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                  borderRadius: 12,
+                );
+                Get.forceAppUpdate();
+              } catch (e) {
+                Get.snackbar(
+                  'Error',
+                  'Failed to reject order: $e',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red.shade600,
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                  borderRadius: 12,
+                );
+              }
             },
           ),
         ],
@@ -269,24 +262,36 @@ class OrdersScreen extends StatelessWidget {
             label: 'Mark as Done',
             icon: Icons.done_all,
             color: Colors.green.shade600,
-            onPressed: () {
-              orders[index] = order.copyWith(status: 'done');
-              orders.refresh();
-              Get.snackbar(
-                'Order Completed',
-                'Order #${order.id} is now done.',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green.shade600,
-                colorText: Colors.white,
-                margin: const EdgeInsets.all(16),
-                borderRadius: 12,
-              );
+            onPressed: () async {
+              try {
+                await checkoutController.updateOrderStatus(order.id, 'done');
+                Get.snackbar(
+                  'Order Completed',
+                  'Order #${order.id} is now done.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.green.shade600,
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                  borderRadius: 12,
+                );
+                Get.forceAppUpdate();
+              } catch (e) {
+                Get.snackbar(
+                  'Error',
+                  'Failed to complete order: $e',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red.shade600,
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                  borderRadius: 12,
+                );
+              }
             },
           ),
         ],
       );
     }
-    return const SizedBox.shrink(); // No buttons for 'done' or 'rejected' status
+    return const SizedBox.shrink();
   }
 
   Widget _buildActionButton({
@@ -317,31 +322,49 @@ class OrdersScreen extends StatelessWidget {
   }
 }
 
-// Data model for an order
 class Order {
   final String id;
   final String customerName;
   final String item;
   final String status;
+  final String phoneNumber;
+  final String email;
+  final String deliveryAddress;
+  final String paymentMethod;
+  final double price;
+  final String productId;
+  final String sellerId;
+  final Timestamp? createdAt;
 
   Order({
     required this.id,
     required this.customerName,
     required this.item,
     required this.status,
+    required this.phoneNumber,
+    required this.email,
+    required this.deliveryAddress,
+    required this.paymentMethod,
+    required this.price,
+    required this.productId,
+    required this.sellerId,
+    this.createdAt,
   });
 
-  Order copyWith({
-    String? id,
-    String? customerName,
-    String? item,
-    String? status,
-  }) {
+  factory Order.fromMap(Map<String, dynamic> data) {
     return Order(
-      id: id ?? this.id,
-      customerName: customerName ?? this.customerName,
-      item: item ?? this.item,
-      status: status ?? this.status,
+      id: data['id'] ?? '',
+      customerName: data['customer_name'] ?? '',
+      item: data['product_name'] ?? 'Unnamed Product',
+      status: data['order_status'] ?? 'pending',
+      phoneNumber: data['phone_number'] ?? '',
+      email: data['email'] ?? '',
+      deliveryAddress: data['delivery_address'] ?? '',
+      paymentMethod: data['payment_method'] ?? 'Cash on Delivery',
+      price: (data['price'] ?? 0.0).toDouble(),
+      productId: data['product_id'] ?? '',
+      sellerId: data['id_seller'] ?? '',
+      createdAt: data['created_at'] as Timestamp?,
     );
   }
 }

@@ -91,7 +91,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.star, size: 16, color: Colors.orange),
+                    Icon(Icons.star, size: 16, color: Color(0xFF93441A)),
                     SizedBox(width: 4),
                     Text(
                       product["rating"].toString(),
@@ -105,7 +105,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange,
+                    color: Color(0xFF93441A),
                   ),
                 ),
               ],

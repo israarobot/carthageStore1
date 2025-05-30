@@ -142,7 +142,7 @@ class _SellersScreenState extends State<SellersScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange, Colors.deepOrange],
+              colors: [Color(0xFF93441A), Colors.deepOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -224,7 +224,7 @@ class _SellersScreenState extends State<SellersScreen> {
                 _buildInfoChip("Status", seller["status"],
                     seller["status"] == "Active" ? Colors.green : Colors.red),
                 _buildInfoChip("Phone", seller["phone"], Colors.teal),
-                _buildInfoChip("Joined", seller["joinDate"], Colors.orange),
+                _buildInfoChip("Joined", seller["joinDate"], Color(0xFF93441A)),
                 _buildInfoChip("Revenue", "\$${seller["totalRevenue"]}", Colors.green),
               ],
             ),

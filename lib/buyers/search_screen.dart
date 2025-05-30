@@ -96,7 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 leading: Image.asset(product["image"]!, width: 50, height: 50, fit: BoxFit.cover),
                 title: Text(product["name"]!, style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text("\$${product["price"]} - Rating: ${product["rating"]}"),
-                trailing: Icon(Icons.add_shopping_cart, color: Colors.orange),
+                trailing: Icon(Icons.add_shopping_cart, color: Color(0xFF93441A)),
                 onTap: () {},
               );
             },
