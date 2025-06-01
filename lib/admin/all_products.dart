@@ -19,9 +19,11 @@ class CategoryScreenState extends State<CategoryScreen> with SingleTickerProvide
   final Map<String, Map<String, dynamic>> categoryData = {
     'Electronics': {'icon': Icons.electrical_services, 'color': Colors.blue},
     'Clothing': {'icon': Icons.checkroom, 'color': Colors.purple},
-    'parfum': {'icon': Icons.spa, 'color': Colors.green},
-    'make-up': {'icon': Icons.brush, 'color': Color(0xFF93441A)},
-    'jewellery': {'icon': Icons.diamond, 'color': Colors.pink},
+    'Parfum': {'icon': Icons.water_drop, 'color': Colors.green},
+    'Make-up': {'icon': Icons.brush, 'color': Color(0xFF93441A)},
+    'skincare': {'icon': Icons.face_retouching_natural,'color': Colors.orange},
+    'Jewellery': {'icon': Icons.diamond, 'color': Colors.pink},
+
   };
 
   @override
@@ -54,7 +56,7 @@ class CategoryScreenState extends State<CategoryScreen> with SingleTickerProvide
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categories'),
+        title: const Text('Categories...'),
       ),
       body: Obx(() => Center(
             child: Container(

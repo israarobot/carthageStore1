@@ -40,154 +40,93 @@ class _OnboardScreenState extends State<OnboardScreen> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background image with FadeIn animation
-          FadeIn(
-            duration: const Duration(seconds: 2),
-            curve: Curves.easeInOut,
-            child: Image.asset(
-              'assets/images/onboarding1.jpg',
+    return GestureDetector(
+      onTap: () {
+        Get.toNamed('/login');
+      },
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background image without animation
+            Image.asset(
+              'assets/images/onboard.jpg',
               fit: BoxFit.cover,
             ),
-          ),
-          // Animated gradient overlay
-          AnimatedBuilder(
-            animation: _gradientColorAnimation,
-            builder: (context, child) {
-              return Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      _gradientColorAnimation.value!,
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Animated "CARTHAGE" text
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildAnimatedLetter('C', 0, Colors.white, ElasticIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('A', 100, Colors.white, BounceIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('R', 200, Colors.white, ElasticIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('T', 300, Colors.white, BounceIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('H', 400, Color(0xFF93441A), ElasticIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('A', 500, Colors.white, BounceIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('G', 600, Colors.white, ElasticIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('E', 700, Color(0xFF93441A), BounceIn, fontSize: 50),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // Animated "STORE" text
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildAnimatedLetter('S', 800, Colors.white, ElasticIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('T', 900, Colors.white, BounceIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('O', 1000, Color(0xFF93441A), ElasticIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('R', 1100, Colors.white, BounceIn, fontSize: 50),
-                    const SizedBox(width: 10),
-                    _buildAnimatedLetter('E', 1200, Colors.white, ElasticIn, fontSize: 50),
-                  ],
-                ),
-                const SizedBox(height: 120),
-                // Animated button
-                Pulse(
-                  duration: const Duration(milliseconds: 1200),
-                  infinite: true,
-                  child: ZoomIn(
-                    duration: const Duration(milliseconds: 1000),
-                    child: GestureDetector(
-                      onTap: () {
-                        print('Button tapped! Navigating to /login');
-                        Get.toNamed('/login');
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Colors.white, Color(0xFFF5F5F5)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFF93441A).withOpacity(0.4),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: null, // Handled by GestureDetector
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 20,
-                              horizontal: 40,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "Let's Get Started",
-                                style: GoogleFonts.poppins(
-                                  color: Color(0xFF93441A),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              FadeInRight(
-                                duration: const Duration(milliseconds: 800),
-                                child: const Icon(
-                                  Icons.arrow_forward,
-                                  color: Color(0xFF93441A),
-                                  size: 24,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+            // Animated gradient overlay
+            AnimatedBuilder(
+              animation: _gradientColorAnimation,
+              builder: (context, child) {
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        _gradientColorAnimation.value!,
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 50),
-              ],
+                );
+              },
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Scrollable Row for "CARTHAGE" text
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildAnimatedLetter('C', 0, Colors.white, ElasticIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('A', 100, Colors.white, BounceIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('R', 200, Colors.white, ElasticIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('T', 300, Colors.white, BounceIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('H', 400, Color(0xFF93441A), ElasticIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('A', 500, Colors.white, BounceIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('G', 600, Colors.white, ElasticIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('E', 700, Color(0xFF93441A), BounceIn, fontSize: 50),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Scrollable Row for "STORE" text
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildAnimatedLetter('S', 800, Colors.white, ElasticIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('T', 900, Colors.white, BounceIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('O', 1000, Color(0xFF93441A), ElasticIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('R', 1100, Colors.white, BounceIn, fontSize: 50),
+                        const SizedBox(width: 10),
+                        _buildAnimatedLetter('E', 1200, Colors.white, ElasticIn, fontSize: 50),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 120),
+                  const SizedBox(height: 50),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     {"name": "Clothing", "icon": Icons.checkroom, 'color': Colors.purple},
     {"name": "Parfum", "icon": Icons.spa, 'color': Colors.green},
     {"name": "Make-up", "icon": Icons.brush, 'color': Color(0xFF93441A)},
+    {"name":"skincare", 'icon': Icons.face_retouching_natural,'color': Colors.orange},
     {"name": "Jewellery", "icon": Icons.diamond, 'color': Colors.pink},
   ];
 
@@ -284,11 +285,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         height: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF93441A), Color(0xFFD17A22)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.3),
@@ -300,25 +296,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ),
         child: Stack(
           children: [
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Opacity(
-                opacity: 0.3,
-                child: Image.asset(
-                  'assets/images/promo_image.png',
-                  height: 150,
-                  width: 150,
+            // Background image with animation
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: DecorationImage(
+                  image: AssetImage('assets/images/Customer.jpg'), // Use a single image
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 150,
-                    width: 150,
-                    color: Colors.grey[300],
-                    child: Icon(Icons.image_not_supported),
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.3),
+                    BlendMode.darken,
                   ),
                 ),
               ),
             ),
+            // Foreground content
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -366,7 +358,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         "Shop Now",
                         style: GoogleFonts.poppins(
                           color: const Color(0xFF93441A),
-                          fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
                       ),
@@ -432,35 +423,35 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             }
 
             return GridView.builder(
-  shrinkWrap: true,
-  physics: const NeverScrollableScrollPhysics(),
-  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 2,
-    crossAxisSpacing: 16,
-    mainAxisSpacing: 16,
-    childAspectRatio: 0.6, // Changed from 0.65 to 0.6
-  ),
-  itemCount: filteredProducts.length,
-  itemBuilder: (context, index) {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 600),
-      delay: Duration(milliseconds: 100 * index),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailsScreen(
-                product: filteredProducts[index],
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.6,
               ),
-            ),
-          );
-        },
-        child: ProductCard(product: filteredProducts[index]),
-      ),
-    );
-  },
-);
+              itemCount: filteredProducts.length,
+              itemBuilder: (context, index) {
+                return FadeInUp(
+                  duration: const Duration(milliseconds: 600),
+                  delay: Duration(milliseconds: 100 * index),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProductDetailsScreen(
+                            product: filteredProducts[index],
+                          ),
+                        ),
+                      );
+                    },
+                    child: ProductCard(product: filteredProducts[index]),
+                  ),
+                );
+              },
+            );
           }),
         ],
       ),

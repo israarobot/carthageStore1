@@ -21,7 +21,7 @@ class AddProductController extends GetxController {
   var imageUrlControllers = <TextEditingController>[TextEditingController()].obs;
 
   // Dropdown options
-  final categories = ['Electronics', 'Clothing', 'Parfum', 'Make-up', 'Jewellery'];
+  final categories = ['Electronics', 'Clothing', 'Parfum', 'Make-up', 'Jewellery', 'skincare'];
   final units = ['Piece', 'Kg', 'Liter', 'Meter'];
   var selectedCategory = Rxn<String>();
   var selectedUnit = Rxn<String>();
@@ -71,7 +71,6 @@ class AddProductController extends GetxController {
     // Check for YouTube URLs
     final RegExp youtubeRegex = RegExp(r'^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.*');
     if (youtubeRegex.hasMatch(url)) {
-      // Convert YouTube URL to embed format
       final RegExp youtubeWatchRegex = RegExp(r'youtube\.com/watch\?v=([a-zA-Z0-9_-]+)');
       final RegExp youtubeShortRegex = RegExp(r'youtu\.be/([a-zA-Z0-9_-]+)');
       String? videoId;
@@ -132,17 +131,11 @@ class AddProductController extends GetxController {
   // Validate video URL
   Future<bool> isValidVideoUrl(String url) async {
     if (url.isEmpty) return true; // Video URL is optional
-
-    // Check for YouTube URLs
     final RegExp youtubeRegex = RegExp(r'^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.*');
     if (youtubeRegex.hasMatch(url)) {
-      // Assume YouTube URLs are valid since we can't reliably check content-type
-      // Optionally, you can use YouTube Data API to verify video existence
       print('YouTube URL detected: $url, assuming valid');
       return true;
     }
-
-    // Validate Google Drive video URLs
     try {
       final convertedUrl = convertUrl(url);
       final response = await http.head(Uri.parse(convertedUrl)).timeout(const Duration(seconds: 10));
@@ -182,7 +175,6 @@ class AddProductController extends GetxController {
     isLoading.value = true;
 
     try {
-      // Validate all image URLs
       List<String> imageUrls = [];
       for (var controller in imageUrlControllers) {
         String imageUrl = convertUrl(controller.text.trim());
@@ -202,7 +194,6 @@ class AddProductController extends GetxController {
         imageUrls.add(imageUrl);
       }
 
-      // Validate video URL
       String videoUrl = videoUrlController.text.trim();
       if (videoUrl.isNotEmpty) {
         bool isValid = await isValidVideoUrl(videoUrl);
@@ -218,10 +209,9 @@ class AddProductController extends GetxController {
           );
           return;
         }
-        videoUrl = convertUrl(videoUrl); // Convert YouTube or Google Drive URL
+        videoUrl = convertUrl(videoUrl);
       }
 
-      // Fetch seller's full name
       String? sellerFullName = 'Unknown Seller';
       final user = authController.user;
       if (user != null) {
@@ -254,7 +244,6 @@ class AddProductController extends GetxController {
         return;
       }
 
-      // Save product to Firestore
       await FirebaseFirestore.instance.collection('products').add({
         'name': nameController.text.trim(),
         'category': selectedCategory.value,
@@ -301,7 +290,10 @@ class AddProductController extends GetxController {
     isLoading.value = true;
 
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('products').get();
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .where('user_id', isEqualTo: authController.user?.uid ?? 'unknown')
+          .get();
 
       products.clear();
 
@@ -323,7 +315,7 @@ class AddProductController extends GetxController {
           if (!isValid) {
             data['video_url'] = null;
           } else {
-            data['video_url'] = convertUrl(data['video_url']); // Convert stored video URL
+            data['video_url'] = convertUrl(data['video_url']);
           }
         }
         print('Fetched product: ${data['name']}, Image URLs: ${data['image_urls']}, Video URL: ${data['video_url']}');
@@ -438,7 +430,7 @@ class AddProductController extends GetxController {
     if (!urlPattern.hasMatch(value)) {
       return 'Enter a valid URL';
     }
-    return null; // Validation is handled by isValidImageUrl
+    return null;
   }
 
   String? validateOptionalUrl(String? value) {
@@ -450,6 +442,6 @@ class AddProductController extends GetxController {
     if (!urlPattern.hasMatch(value) && !youtubeRegex.hasMatch(value)) {
       return 'Enter a valid URL';
     }
-    return null; // Validation is handled by isValidVideoUrl
+    return null;
   }
 }

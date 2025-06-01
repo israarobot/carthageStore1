@@ -1,49 +1,263 @@
+import 'package:carthage_store/controllers/auth-controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class BuyersScreen extends StatefulWidget {
+  const BuyersScreen({super.key});
+
   @override
   _BuyersScreenState createState() => _BuyersScreenState();
 }
 
 class _BuyersScreenState extends State<BuyersScreen> {
-  List<Map<String, dynamic>> buyers = [
-    {
-      "id": "BUY001",
-      "name": "Alice Johnson",
-      "email": "alice@example.com",
-      "purchases": 15,
-      "status": "Active",
-      "phone": "+1-555-0123",
-      "joinDate": "2024-01-15",
-      "totalSpent": 599.75,
-      "address": "123 Main St, Springfield"
-    },
-    {
-      "id": "BUY002",
-      "name": "Bob Smith",
-      "email": "bob@example.com",
-      "purchases": 8,
-      "status": "Active",
-      "phone": "+1-555-0456",
-      "joinDate": "2024-03-20",
-      "totalSpent": 349.90,
-      "address": "456 Oak Ave, Rivertown"
-    },
-    {
-      "id": "BUY003",
-      "name": "Carol Williams",
-      "email": "carol@example.com",
-      "purchases": 22,
-      "status": "Inactive",
-      "phone": "+1-555-0789",
-      "joinDate": "2023-11-10",
-      "totalSpent": 899.45,
-      "address": "789 Pine Rd, Lakeside"
-    },
-  ];
+  final AuthController authController = Get.find<AuthController>();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          "Buyers Management",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            shadows: [Shadow(color: Colors.black26, offset: Offset(1, 1))],
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF93441A), Colors.deepOrange],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+      body: Obx(
+        () => authController.isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF93441A)),
+                ),
+              )
+            : authController.errorMessage.isNotEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          authController.errorMessage.value,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            authController.clearError();
+                            setState(() {});
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF93441A),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Retry',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : FutureBuilder<List<Map<String, dynamic>>>(
+                    future: authController.getAllUsers(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFF93441A),
+                            ),
+                          ),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Error: ${snapshot.error}',
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }
+                      final buyers = snapshot.data
+                          ?.where((user) => user['role'] == 'buyer')
+                          .toList();
+                      if (buyers == null || buyers.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            "No buyers found",
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: buyers.length,
+                        itemBuilder: (context, index) =>
+                            _buildBuyerCard(buyers[index], context),
+                      );
+                    },
+                  ),
+      ),
+    );
+  }
+
+  Widget _buildBuyerCard(Map<String, dynamic> buyer, BuildContext context) {
+    final createdAt = buyer['createdAt'] != null
+        ? DateFormat('yyyy-MM-dd')
+            .format((buyer['createdAt'] as Timestamp).toDate())
+        : 'Unknown';
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 35,
+                  backgroundColor: Colors.green.shade100,
+                  child: Text(
+                    buyer["fullName"]?[0] ?? 'U',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        buyer["fullName"] ?? 'No Name',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        buyer["email"] ?? 'No Email',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              children: [
+                _buildInfoChip("Purchases", "${buyer["purchases"] ?? 0}", Colors.blue),
+                _buildInfoChip("Status", buyer["role"] ?? 'buyer', Colors.green),
+                _buildInfoChip("Phone", buyer["phone"] ?? 'Unknown', Colors.purple),
+                _buildInfoChip("Joined", createdAt, const Color(0xFF93441A)),
+                _buildInfoChip("Spent", "\$${buyer["totalSpent"] ?? 0.0}", Colors.teal),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Address: ${buyer["address"] ?? 'Unknown'}",
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue, size: 28),
+                  onPressed: () => _showUpdateDialog(context, buyer),
+                  tooltip: 'Edit Buyer',
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 28),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Confirm Delete'),
+                        content: Text(
+                            'Are you sure you want to delete ${buyer["fullName"]}?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await authController.deleteUser(buyer["id"]);
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                            child: const Text('Delete',
+                                style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  tooltip: 'Delete Buyer',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _showUpdateDialog(BuildContext context, Map<String, dynamic> buyer) {
-    final nameController = TextEditingController(text: buyer["name"]);
+    final nameController = TextEditingController(text: buyer["fullName"]);
     final emailController = TextEditingController(text: buyer["email"]);
     final phoneController = TextEditingController(text: buyer["phone"]);
     final addressController = TextEditingController(text: buyer["address"]);
@@ -89,186 +303,29 @@ class _BuyersScreenState extends State<BuyersScreen> {
               backgroundColor: Colors.green,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: () {
-              setState(() {
-                final index = buyers.indexWhere((b) => b["id"] == buyer["id"]);
-                buyers[index] = {
-                  ...buyers[index],
-                  "name": nameController.text,
-                  "email": emailController.text,
-                  "phone": phoneController.text,
-                  "address": addressController.text,
-                };
-              });
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Buyer updated successfully")),
-              );
+            onPressed: () async {
+              try {
+                await _firestore.collection('users').doc(buyer["id"]).update({
+                  'fullName': nameController.text.trim(),
+                  'email': emailController.text.trim(),
+                  'phone': phoneController.text.trim(),
+                  'address': addressController.text.trim(),
+                  'updatedAt': Timestamp.now(),
+                });
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Buyer updated successfully")),
+                );
+                setState(() {});
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Failed to update buyer: $e")),
+                );
+              }
             },
             child: const Text('Update', style: TextStyle(color: Colors.white)),
           ),
         ],
-      ),
-    );
-  }
-
-  void _deleteBuyer(String id) {
-    setState(() {
-      buyers.removeWhere((buyer) => buyer["id"] == id);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Buyer deleted successfully")),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text(
-          "Buyers Management",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            shadows: [Shadow(color: Colors.black26, offset: Offset(1, 1))],
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF93441A), Colors.deepOrange],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
-      body: buyers.isEmpty
-          ? const Center(
-              child: Text(
-                "No buyers found",
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: buyers.length,
-              itemBuilder: (context, index) => _buildBuyerCard(buyers[index], context),
-            ),
-    );
-  }
-
-  Widget _buildBuyerCard(Map<String, dynamic> buyer, BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundColor: Colors.green.shade100,
-                  child: Text(
-                    buyer["name"][0],
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        buyer["name"],
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        buyer["email"],
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              children: [
-                _buildInfoChip("Purchases", "${buyer["purchases"]}", Colors.blue),
-                _buildInfoChip("Status", buyer["status"],
-                    buyer["status"] == "Active" ? Colors.green : Colors.red),
-                _buildInfoChip("Phone", buyer["phone"], Colors.purple),
-                _buildInfoChip("Joined", buyer["joinDate"], Color(0xFF93441A)),
-                _buildInfoChip("Spent", "\$${buyer["totalSpent"]}", Colors.teal),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Address: ${buyer["address"]}",
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue, size: 28),
-                  onPressed: () => _showUpdateDialog(context, buyer),
-                  tooltip: 'Edit Buyer',
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red, size: 28),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Confirm Delete'),
-                        content: Text('Are you sure you want to delete ${buyer["name"]}?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _deleteBuyer(buyer["id"]);
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  tooltip: 'Delete Buyer',
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

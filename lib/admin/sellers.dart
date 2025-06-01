@@ -1,52 +1,264 @@
+import 'package:carthage_store/controllers/auth-controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class SellersScreen extends StatefulWidget {
+  const SellersScreen({super.key});
+
   @override
   _SellersScreenState createState() => _SellersScreenState();
 }
 
 class _SellersScreenState extends State<SellersScreen> {
-  List<Map<String, dynamic>> sellers = [
-    {
-      "id": "SEL001",
-      "name": "David Brown",
-      "email": "david@example.com",
-      "products": 12,
-      "sales": 45,
-      "phone": "+1-555-1234",
-      "joinDate": "2024-02-10",
-      "totalRevenue": 2450.80,
-      "storeName": "Brown's Electronics",
-      "status": "Active"
-    },
-    {
-      "id": "SEL002",
-      "name": "Emma Davis",
-      "email": "emma@example.com",
-      "products": 8,
-      "sales": 32,
-      "phone": "+1-555-5678",
-      "joinDate": "2024-04-15",
-      "totalRevenue": 1789.60,
-      "storeName": "Davis Fashion",
-      "status": "Active"
-    },
-    {
-      "id": "SEL003",
-      "name": "Frank Wilson",
-      "email": "frank@example.com",
-      "products": 15,
-      "sales": 60,
-      "phone": "+1-555-9012",
-      "joinDate": "2023-12-05",
-      "totalRevenue": 3890.25,
-      "storeName": "Wilson's Gadgets",
-      "status": "Inactive"
-    },
-  ];
+  final AuthController authController = Get.find<AuthController>();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          "Sellers Management",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            shadows: [Shadow(color: Colors.black26, offset: Offset(1, 1))],
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF93441A), Colors.deepOrange],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+      body: Obx(
+        () => authController.isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF93441A)),
+                ),
+              )
+            : authController.errorMessage.isNotEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          authController.errorMessage.value,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            authController.clearError();
+                            setState(() {});
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF93441A),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Retry',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : FutureBuilder<List<Map<String, dynamic>>>(
+                    future: authController.getAllUsers(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFF93441A),
+                            ),
+                          ),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Error: ${snapshot.error}',
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }
+                      final sellers = snapshot.data
+                          ?.where((user) => user['role'] == 'seller')
+                          .toList();
+                      if (sellers == null || sellers.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            "No sellers found",
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: sellers.length,
+                        itemBuilder: (context, index) =>
+                            _buildSellerCard(sellers[index], context),
+                      );
+                    },
+                  ),
+      ),
+    );
+  }
+
+  Widget _buildSellerCard(Map<String, dynamic> seller, BuildContext context) {
+    final createdAt = seller['createdAt'] != null
+        ? DateFormat('yyyy-MM-dd')
+            .format((seller['createdAt'] as Timestamp).toDate())
+        : 'Unknown';
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 35,
+                  backgroundColor: Colors.purple.shade100,
+                  child: Text(
+                    seller["fullName"]?[0] ?? 'S',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        seller["fullName"] ?? 'No Name',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        seller["email"] ?? 'No Email',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              children: [
+                _buildInfoChip("Products", "${seller["products"] ?? 0}", Colors.purple),
+                _buildInfoChip("Sales", "${seller["sales"] ?? 0}", Colors.blue),
+                _buildInfoChip("Status", seller["role"] ?? 'seller', Colors.green),
+                _buildInfoChip("Phone", seller["phone"] ?? 'Unknown', Colors.teal),
+                _buildInfoChip("Joined", createdAt, const Color(0xFF93441A)),
+                _buildInfoChip("Revenue", "\$${seller["totalRevenue"] ?? 0.0}", Colors.green),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Store: ${seller["storeName"] ?? 'Unknown'}",
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue, size: 28),
+                  onPressed: () => _showUpdateDialog(context, seller),
+                  tooltip: 'Edit Seller',
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 28),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Confirm Delete'),
+                        content: Text(
+                            'Are you sure you want to delete ${seller["fullName"]}?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await authController.deleteUser(seller["id"]);
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                            child: const Text('Delete',
+                                style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  tooltip: 'Delete Seller',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _showUpdateDialog(BuildContext context, Map<String, dynamic> seller) {
-    final nameController = TextEditingController(text: seller["name"]);
+    final nameController = TextEditingController(text: seller["fullName"]);
     final emailController = TextEditingController(text: seller["email"]);
     final phoneController = TextEditingController(text: seller["phone"]);
     final storeNameController = TextEditingController(text: seller["storeName"]);
@@ -92,187 +304,29 @@ class _SellersScreenState extends State<SellersScreen> {
               backgroundColor: Colors.purple,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: () {
-              setState(() {
-                final index = sellers.indexWhere((s) => s["id"] == seller["id"]);
-                sellers[index] = {
-                  ...sellers[index],
-                  "name": nameController.text,
-                  "email": emailController.text,
-                  "phone": phoneController.text,
-                  "storeName": storeNameController.text,
-                };
-              });
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Seller updated successfully")),
-              );
+            onPressed: () async {
+              try {
+                await _firestore.collection('users').doc(seller["id"]).update({
+                  'fullName': nameController.text.trim(),
+                  'email': emailController.text.trim(),
+                  'phone': phoneController.text.trim(),
+                  'storeName': storeNameController.text.trim(),
+                  'updatedAt': Timestamp.now(),
+                });
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Seller updated successfully")),
+                );
+                setState(() {});
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Failed to update seller: $e")),
+                );
+              }
             },
             child: const Text('Update', style: TextStyle(color: Colors.white)),
           ),
         ],
-      ),
-    );
-  }
-
-  void _deleteSeller(String id) {
-    setState(() {
-      sellers.removeWhere((seller) => seller["id"] == id);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Seller deleted successfully")),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text(
-          "Sellers Management",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            shadows: [Shadow(color: Colors.black26, offset: Offset(1, 1))],
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF93441A), Colors.deepOrange],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
-      body: sellers.isEmpty
-          ? const Center(
-              child: Text(
-                "No sellers found",
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: sellers.length,
-              itemBuilder: (context, index) => _buildSellerCard(sellers[index], context),
-            ),
-    );
-  }
-
-  Widget _buildSellerCard(Map<String, dynamic> seller, BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundColor: Colors.purple.shade100,
-                  child: Text(
-                    seller["name"][0],
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        seller["name"],
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        seller["email"],
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              children: [
-                _buildInfoChip("Products", "${seller["products"]}", Colors.purple),
-                _buildInfoChip("Sales", "${seller["sales"]}", Colors.blue),
-                _buildInfoChip("Status", seller["status"],
-                    seller["status"] == "Active" ? Colors.green : Colors.red),
-                _buildInfoChip("Phone", seller["phone"], Colors.teal),
-                _buildInfoChip("Joined", seller["joinDate"], Color(0xFF93441A)),
-                _buildInfoChip("Revenue", "\$${seller["totalRevenue"]}", Colors.green),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Store: ${seller["storeName"]}",
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue, size: 28),
-                  onPressed: () => _showUpdateDialog(context, seller),
-                  tooltip: 'Edit Seller',
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red, size: 28),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Confirm Delete'),
-                        content: Text('Are you sure you want to delete ${seller["name"]}?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _deleteSeller(seller["id"]);
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  tooltip: 'Delete Seller',
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

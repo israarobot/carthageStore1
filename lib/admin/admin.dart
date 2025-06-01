@@ -36,7 +36,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF93441A), Colors.deepOrange],
+              colors: [Color(0xFF93441A), Color(0xFF93441A)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
